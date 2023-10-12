@@ -34,8 +34,6 @@ function connect(event) {
         var socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, onConnect, onError);
-        drawingForm.classList.add('drawingForm-visible');
-        userNameField.classList.add('namefield-visible');
     }
     event.preventDefault();
 }
@@ -49,8 +47,6 @@ function onConnect(payload) {
             messageType: 'REJOINDRE'
         }));
         isIn = true;
-        btnInscription.textContent = btnDesnscriptionTexte;
-        stompClient.send('/app/pixelWar.getPixels', {}, JSON.stringify({messageType: 'AFFICHER_CANVAS'}));
     } else {
         stompClient.send('/app/pixelWar.addUser', {}, JSON.stringify({
             pixel: 0,
@@ -71,14 +67,22 @@ function onError() {
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
     var userElement = document.createElement('li');
-    if (message.messageType === "REJOINDRE") {
-        userElement.appendChild(document.createTextNode(message.sender + ' a rejoint la pw !'));
-        userLeft = false;
+    if (message.pixelDrawing.messageType === "REJOINDRE") {
+        userElement.appendChild(document.createTextNode(message.pixelDrawing.sender + ' a rejoint la pw !'));
+        if (message.user !== null) {
+            userLeft = false;
+            btnInscription.textContent = btnDesnscriptionTexte;
+            drawingForm.classList.add('drawingForm-visible');
+            userNameField.classList.add('namefield-visible');
+            stompClient.send('/app/pixelWar.getPixels', {}, JSON.stringify({messageType: 'AFFICHER_CANVAS'}));
+        } else {
+            window.alert("Nom d'utilisateur déjà existant, veuillez en choisir un autre.")
+        }
     } else if (message.messageType === "QUITTER" && !userLeft) {
         userLeft = true;
         userElement.appendChild(document.createTextNode(message.sender + ' a quitté la pw !'));
     } else if (message.messageType === "DESSINER" && !userLeft) {
-            userElement.appendChild(document.createTextNode(message.sender + ' a dessiné !'));
+        userElement.appendChild(document.createTextNode(message.sender + ' a dessiné !'));
         drawInCanvas(message.coordoX, message.coordoY, message.color);
     } else {
         let pixels = message;
