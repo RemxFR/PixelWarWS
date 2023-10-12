@@ -10,6 +10,6 @@ import lombok.Setter;
 public class WsResponse {
 
     private PixelDrawing pixelDrawing;
-    private User user;
+    private String sender;
 
 }

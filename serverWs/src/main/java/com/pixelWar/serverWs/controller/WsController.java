@@ -36,21 +36,11 @@ public class WsController {
     @SendTo("/pixel/public")
     public WsResponse addUser(@Payload PixelDrawing pixelDrawing,
                               SimpMessageHeaderAccessor headerAccessor) {
-        User userToSave = null;
-        User userSaved = null;
         System.out.println("Test persitence user");
-        if (pixelDrawing.getSender() != null) {
-            System.out.println("Test init persitence user");
-            userToSave = User.builder().name(pixelDrawing.getSender()).build();
-            userSaved = this.userService.saveUser(userToSave);
-            if(userSaved != null) {
-                System.out.println(userSaved.getName());
-            }
-        }
         headerAccessor.getSessionAttributes().put("username", pixelDrawing.getSender());
         return WsResponse.builder()
                 .pixelDrawing(pixelDrawing)
-                .user(userSaved)
+                .sender(pixelDrawing.getSender())
                 .build();
     }
 
@@ -58,11 +48,9 @@ public class WsController {
     @MessageMapping("/pixelWar.deconnectUser")
     @SendTo("/pixel/public")
     public PixelDrawing deconnectUser(@Payload PixelDrawing pixelDrawing) {
-        if (pixelDrawing.getMessageType().equals(EMessageType.QUITTER.toString()) && pixelDrawing.getSender() != null) {
-            this.userService.deleteUser(pixelDrawing.getSender());
-        }
         return pixelDrawing;
     }
+
     //Pour Ajouter, modifier un pixel.
     @MessageMapping("/pixelWar.drawPixel")
     @SendTo("/pixel/public")

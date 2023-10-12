@@ -5,12 +5,10 @@ Déclaration des tags de la partie html possédant un id
  */
 var usernameForm = document.querySelector("#usernameForm");
 var drawingForm = document.querySelector("#drawingForm");
-var userList = document.querySelector("#utilisateursListe");
 var canvas = document.querySelector("#canvas");
 var btnInscription = document.querySelector("#btn-inscription");
 var userNameField = document.querySelector("#name");
 var btnInscriptionTexte = "S'Inscrire";
-var btnDesnscriptionTexte = "Se Désinscrire";
 
 /*
 Déclaration des variables qui vont être utilisées pour la connexion ws.
@@ -20,7 +18,6 @@ var username = null;
 var coorY = null;
 var coorX = null;
 var col = null;
-var isIn = false;
 var socket = null;
 
 /*
@@ -41,7 +38,7 @@ function connect(event) {
     if (username) {
         socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
-        stompClient.connect({}, onConnect, onError);
+        stompClient.connect({}, onConnect);
     }
     event.preventDefault();
 }
@@ -49,19 +46,10 @@ function connect(event) {
 //Ce qu'il se passe au moment du clic sur le bouton de connexion/déconnexion.
 function onConnect(payload) {
     stompClient.subscribe('/pixel/public', onMessageReceived);
-    if (!isIn) {
-        isIn = true;
         stompClient.send('/app/pixelWar.addUser', {}, JSON.stringify({
             sender: username,
             messageType: 'REJOINDRE'
         }));
-    } else {
-        isIn = false;
-        stompClient.send('/app/pixelWar.deconnectUser', {}, JSON.stringify({
-            sender: username,
-            messageType: 'QUITTER'
-        }));
-    }
 }
 
 //La connexion de la ws se ferme lorsque la page web est quittée.
@@ -74,6 +62,7 @@ window.addEventListener("unload", function () {
 //Gestion des erreurs par l'affichage d'une alert.
 function onError() {
     window.alert('Could not connect to websocket server. Refresh and try again.');
+    window.location.reload();
 }
 
 //Différentes implémentations de ce qu'il se passe au niveau du front lorsque le serveur envoie un message.
@@ -83,68 +72,61 @@ function onMessageReceived(payload) {
 
     //On affiche le formulaire de dessin si le nom de l'utilisateur est disponible, sinon on affiche une alerte.
     if (message.pixelDrawing !== undefined) {
-        if (message.pixelDrawing.messageType === "REJOINDRE" && isIn) {
+        if (message.pixelDrawing.messageType === "REJOINDRE") {
             if (message.user !== null) {
                 userElement.appendChild(document.createTextNode(message.pixelDrawing.sender + ' a rejoint la pw !'));
-                btnInscription.textContent = btnDesnscriptionTexte;
+                // btnInscription.textContent = btnDesnscriptionTexte;
                 drawingForm.classList.add('drawingForm-visible');
                 userNameField.classList.add('namefield-visible');
                 stompClient.send('/app/pixelWar.getPixels', {}, JSON.stringify({messageType: 'AFFICHER_CANVAS'}));
             } else {
-                window.alert("Nom d'utilisateur déjà existant, veuillez en choisir un autre.")
+                window.alert("Nom d'utilisateur déjà existant, veuillez en choisir un autre.");
             }
         }
-    }
-
-        //On se déconnecte de la ws.
-        if (message.messageType === "QUITTER" && !isIn) {
-            userElement.appendChild(document.createTextNode(message.sender + ' a quitté la pw !'));
-            socket.close();
 
         //On dessine sur le canvas tous les pixels en temps réel.
-        } else if (message.messageType === "DESSINER" && !isIn) {
-            userElement.appendChild(document.createTextNode(message.sender + ' a dessiné !'));
-            drawInCanvas(message.coordoX, message.coordoY, message.color);
+    } else if (message.messageType === "DESSINER") {
+        console.log('DESSINE')
+        drawInCanvas(message.coordoX, message.coordoY, message.color);
 
         //On se déconnecte de la ws et on cache le formulaire de dessin.
-        } else if (message.messageType === "QUITTER") {
-            btnInscription.textContent = btnInscriptionTexte;
-            userNameField.classList.add('namefield-hidden');
-            socket.close();
+    } else if (message.messageType === "QUITTER") {
+        btnInscription.textContent = btnInscriptionTexte;
+        drawingForm.classList.add('.drawingForm-hidden');
+        socket.close();
 
         //On dessine sur le canvas tous les pixels déjà enregistrés en bdd.
-        } else {
-            let pixels = message;
-            for (let i = 0; i < pixels.length; i++) {
-                drawInCanvas(pixels[i].coordoX, pixels[i].coordoY, pixels[i].color);
-            }
+    } else {
+        let pixels = message;
+        for (let i = 0; i < pixels.length; i++) {
+            drawInCanvas(pixels[i].coordoX, pixels[i].coordoY, pixels[i].color);
         }
-        userList.appendChild(userElement);
     }
+}
 
-    /*Méthode pour récupérer les valeurs du formulaire de dessin et envoyer le message à la partie serveur que l'on dessine.
-    Affichage d'une alerte si les valeurs des coordonnées du pixel sont fausses.
-     */
-    function drawPixel(event) {
-        coorX = document.querySelector("#coorXinput").value;
-        coorY = document.querySelector("#coorYinput").value;
-        col = document.querySelector("#couleur").value;
-        if (coorY < canvasWidth && coorX < canvasHeight) {
-            var pixelToDraw = {coordoX: coorX, coordoY: coorY, color: col, sender: username, messageType: 'DESSINER'}
-            stompClient.send('/app/pixelWar.drawPixel', {}, JSON.stringify(pixelToDraw));
-            drawInCanvas(coorX, coorY, col);
-        } else {
-            window.alert("Coordonnées X entre 0 et 700, coordonnées Y entre 0 et 1000");
-        }
-        event.preventDefault();
+/*Méthode pour récupérer les valeurs du formulaire de dessin et envoyer le message à la partie serveur que l'on dessine.
+Affichage d'une alerte si les valeurs des coordonnées du pixel sont fausses.
+ */
+function drawPixel(event) {
+    coorX = document.querySelector("#coorXinput").value;
+    coorY = document.querySelector("#coorYinput").value;
+    col = document.querySelector("#couleur").value;
+    if (coorY < canvasWidth && coorX < canvasHeight) {
+        var pixelToDraw = {coordoX: coorX, coordoY: coorY, color: col, sender: username, messageType: 'DESSINER'}
+        stompClient.send('/app/pixelWar.drawPixel', {}, JSON.stringify(pixelToDraw));
+        drawInCanvas(coorX, coorY, col);
+    } else {
+        window.alert("Coordonnées X entre 0 et 700, coordonnées Y entre 0 et 1000");
     }
+    event.preventDefault();
+}
 
-    //Méthode de dessin/de remplissage du canvas.
-    function drawInCanvas(coorX, coorY, col) {
-        ctx.fillStyle = col;
-        ctx.fillRect(coorX, coorY, 1, 1);
-    }
+//Méthode de dessin/de remplissage du canvas.
+function drawInCanvas(coorX, coorY, col) {
+    ctx.fillStyle = col;
+    ctx.fillRect(coorX, coorY, 1, 1);
+}
 
-    //Association des méthodes avec les formulaires correspondants.
-    usernameForm.addEventListener('submit', connect, true);
-    drawingForm.addEventListener('submit', drawPixel, true);
+//Association des méthodes avec les formulaires correspondants.
+drawingForm.addEventListener('submit', drawPixel, true);
+usernameForm.addEventListener('submit', connect, true);
