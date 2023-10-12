@@ -1,0 +1,64 @@
+.page-style, body  {
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.pixelwar_conteneur {
+    background: lightgray;
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+.canvas-et-form_conteneur {
+    height: 100%;
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    border-right: 1px solid gray;
+}
+
+.titre {
+    text-align: center;
+}
+
+.canvas {
+   background: white;
+    border: 1px solid black;
+}
+
+.drawingForm-hidden, .namefield-hidden {
+    visibility: hidden;
+}
+
+.drawingForm-visible, .namefield-visible {
+    visibility: visible;
+}
+
+.utilisateurForm {
+    display: flex;
+    align-items: center;
+}
+
+.liste-utilisateurs_conteneur {
+    height: 100%;
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.liste-utilisateurs {
+    position: relative;
+    list-style: none;
+    height: 85%;
+    width: 80%;
+    max-height: 85%;
+    overflow: scroll;
+    background: white;
+    border: 1px solid black;
+}

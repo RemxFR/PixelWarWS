@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html class="page-style" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PixelWar Ynov</title>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<div class="pixelwar_conteneur">
+
+    <div class="canvas-et-form_conteneur">
+        <h1 class="titre">PixelWar Ynov 2023</h1>
+        <canvas id="canvas" class="canvas"></canvas>
+        <form class="drawingForm-hidden" id="drawingForm" name="drawingForm">
+            <label for="coorXinput">Coordonnée x</label>
+            <input id="coorXinput" required min="1" max="700" minlength="1" maxlength="3" type="number"
+                   placeholder="choisis une hauteur entre 1 et 700">;
+            <label for="coorYinput">Coordonnée x</label>
+            <input id="coorYinput" required min="1" max="1000" minlength="1" maxlength="4" type="number"
+                   placeholder="choisis une largeur entre 1 et 1000">;
+            <label for="couleur">Choisir une couleur</label>
+            <input id="couleur" type="color" required value="#ffff">
+            <button id="drawButton" type="submit">Dessiner</button>
+        </form>
+    </div>
+
+    <div class="liste-utilisateurs_conteneur">
+        <h2>Liste Utilisateurs</h2>
+        <ul id="utilisateursListe" class="liste-utilisateurs"></ul>
+        <form class="utilisateurForm" id="usernameForm" name="usernameForm">
+            <input id="name" aria-label="login" type="text" placeholder="entrer login">
+            <button id="btn-inscription" type="submit">S'Inscrire</button>
+        </form>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>
