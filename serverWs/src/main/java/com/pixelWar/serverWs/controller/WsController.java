@@ -15,6 +15,10 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+Contrôleur ws pour gérer la connexion à la websocket, l'enregistrement et la modification des pixels, l'enregistrement
+ et la suppression des users et la récupérationd e tous les pixels enregistrés.
+ */
 @Controller
 public class WsController {
 
@@ -23,46 +27,62 @@ public class WsController {
     private final UserService userService;
 
     public WsController(CanvasService canvasService, UserService userService) {
-
         this.canvasService = canvasService;
         this.userService = userService;
     }
 
+    //Pour persister un utilisateur
     @MessageMapping("/pixelWar.addUser")
     @SendTo("/pixel/public")
     public WsResponse addUser(@Payload PixelDrawing pixelDrawing,
                               SimpMessageHeaderAccessor headerAccessor) {
-        User user = User.builder().name(pixelDrawing.getSender()).build();
         User userToSave = null;
-        if(user.getName() != null) {
-           userToSave = this.userService.saveUser(user);
+        User userSaved = null;
+        System.out.println("Test persitence user");
+        if (pixelDrawing.getSender() != null) {
+            System.out.println("Test init persitence user");
+            userToSave = User.builder().name(pixelDrawing.getSender()).build();
+            userSaved = this.userService.saveUser(userToSave);
+            if(userSaved != null) {
+                System.out.println(userSaved.getName());
+            }
         }
         headerAccessor.getSessionAttributes().put("username", pixelDrawing.getSender());
         return WsResponse.builder()
                 .pixelDrawing(pixelDrawing)
-                .user(userToSave)
+                .user(userSaved)
                 .build();
     }
 
+    //Pour supprimer un utilisateur
+    @MessageMapping("/pixelWar.deconnectUser")
+    @SendTo("/pixel/public")
+    public PixelDrawing deconnectUser(@Payload PixelDrawing pixelDrawing) {
+        if (pixelDrawing.getMessageType().equals(EMessageType.QUITTER.toString()) && pixelDrawing.getSender() != null) {
+            this.userService.deleteUser(pixelDrawing.getSender());
+        }
+        return pixelDrawing;
+    }
+    //Pour Ajouter, modifier un pixel.
     @MessageMapping("/pixelWar.drawPixel")
     @SendTo("/pixel/public")
     public PixelDrawing drawPixel(@Payload PixelDrawing pixelDrawing) {
         if (pixelDrawing != null) {
+            if(pixelDrawing.getId() != null) {
+                this.canvasService.updatePixel(pixelDrawing);
+            }
             this.canvasService.savePixels(pixelDrawing);
         }
         return pixelDrawing;
     }
 
+    //POur récupérer tous les pixels dessinés.
     @MessageMapping("/pixelWar.getPixels")
     @SendTo("/pixel/public")
     public List<PixelDrawing> getPixels(@Payload PixelDrawing pixelDrawing) {
         List<PixelDrawing> pixelDrawingList = new ArrayList<>();
-        System.out.println("Affichage du canvas en préparation");
-        System.out.println(pixelDrawing.getMessageType());
-        System.out.println(EMessageType.AFFICHER_CANVAS);
-        if(pixelDrawing.getMessageType().equals(EMessageType.AFFICHER_CANVAS.toString())) {
+        if (pixelDrawing.getMessageType().equals(EMessageType.AFFICHER_CANVAS.toString())) {
             pixelDrawingList = this.canvasService.findAllPixels();
-            System.out.println("Canvas trouvé en bdd");
         }
         return pixelDrawingList;
     }

@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+
+/*
+Classe qui gère les requêtes Get, Post et Update pour les pixels du canvas.
+ */
 @Service
 public class CanvasService {
 
@@ -25,7 +29,7 @@ public class CanvasService {
         }
     }
 
-    private PixelDrawing getPixelById(PixelDrawing pixelDrawing) {
+    public PixelDrawing getPixelById(PixelDrawing pixelDrawing) {
         PixelDrawing drawing = null;
         if(pixelDrawing != null) {
            drawing = this.canvasRepository.getById(pixelDrawing.getId());
@@ -33,7 +37,7 @@ public class CanvasService {
         return drawing;
     }
 
-    private PixelDrawing updatePixel(PixelDrawing pixelDrawing) {
+    public PixelDrawing updatePixel(PixelDrawing pixelDrawing) {
         PixelDrawing drawing = null;
         if(pixelDrawing != null) {
             drawing.setCoordoX(pixelDrawing.getCoordoX());

@@ -11,6 +11,9 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+/*
+Classe qui gère le message de déconnexion et le retrait du username des attributs de session.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
