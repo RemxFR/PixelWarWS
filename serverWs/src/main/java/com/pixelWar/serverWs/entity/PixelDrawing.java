@@ -25,8 +25,7 @@ public class PixelDrawing {
     @Column(name = "color")
     private String color;
 
-    @ManyToOne
-    private User sender;
+    private String sender;
 
     private String messageType;
 

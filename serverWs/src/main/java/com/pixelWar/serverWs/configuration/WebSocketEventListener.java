@@ -24,10 +24,9 @@ public class WebSocketEventListener {
         String userName = (String) headerAccessor.getSessionAttributes().get("username");
         if(userName != null) {
             log.info("User disconnected: {}", userName);
-            User user = User.builder().name(userName).build();
             var pixelDrawing = PixelDrawing.builder()
                     .messageType(EMessageType.QUITTER.toString())
-                    .sender(user)
+                    .sender(userName)
                     .build();
 
             messageSendingOperations.convertAndSend("/pixel/public", pixelDrawing);

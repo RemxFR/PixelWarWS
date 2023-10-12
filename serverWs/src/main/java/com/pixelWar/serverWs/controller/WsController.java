@@ -2,7 +2,10 @@ package com.pixelWar.serverWs.controller;
 
 import com.pixelWar.serverWs.entity.EMessageType;
 import com.pixelWar.serverWs.entity.PixelDrawing;
+import com.pixelWar.serverWs.entity.User;
+import com.pixelWar.serverWs.entity.WsResponse;
 import com.pixelWar.serverWs.service.CanvasService;
+import com.pixelWar.serverWs.service.UserService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -17,17 +20,28 @@ public class WsController {
 
 
     private final CanvasService canvasService;
+    private final UserService userService;
 
-    public WsController(CanvasService canvasService) {
+    public WsController(CanvasService canvasService, UserService userService) {
+
         this.canvasService = canvasService;
+        this.userService = userService;
     }
 
     @MessageMapping("/pixelWar.addUser")
     @SendTo("/pixel/public")
-    public PixelDrawing addUser(@Payload PixelDrawing pixelDrawing,
-                                SimpMessageHeaderAccessor headerAccessor) {
+    public WsResponse addUser(@Payload PixelDrawing pixelDrawing,
+                              SimpMessageHeaderAccessor headerAccessor) {
+        User user = User.builder().name(pixelDrawing.getSender()).build();
+        User userToSave = null;
+        if(user.getName() != null) {
+           userToSave = this.userService.saveUser(user);
+        }
         headerAccessor.getSessionAttributes().put("username", pixelDrawing.getSender());
-        return pixelDrawing;
+        return WsResponse.builder()
+                .pixelDrawing(pixelDrawing)
+                .user(userToSave)
+                .build();
     }
 
     @MessageMapping("/pixelWar.drawPixel")
