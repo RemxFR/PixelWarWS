@@ -1,4 +1,4 @@
-# PIXELWAR YNOV LYON 2023
+# PIXELWAR YNOV LYON 2023 Client & Serveur
 
 ## Fonctionnement
 Pixel war maison, on s'inscrit et ensuite on dessine sur un canvas.
