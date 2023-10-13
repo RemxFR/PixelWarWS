@@ -7,7 +7,6 @@ var usernameForm = document.querySelector("#usernameForm");
 var drawingForm = document.querySelector("#drawingForm");
 var canvas = document.querySelector("#canvas");
 var btnInscription = document.querySelector("#btn-inscription");
-var userNameField = document.querySelector("#name");
 var btnInscriptionTexte = "S'Inscrire";
 
 /*
@@ -62,7 +61,6 @@ window.addEventListener("unload", function () {
 //Gestion des erreurs par l'affichage d'une alert.
 function onError() {
     window.alert('Could not connect to websocket server. Refresh and try again.');
-    window.location.reload();
 }
 
 //Différentes implémentations de ce qu'il se passe au niveau du front lorsque le serveur envoie un message.
@@ -73,15 +71,10 @@ function onMessageReceived(payload) {
     //On affiche le formulaire de dessin si le nom de l'utilisateur est disponible, sinon on affiche une alerte.
     if (message.pixelDrawing !== undefined) {
         if (message.pixelDrawing.messageType === "REJOINDRE") {
-            if (message.user !== null) {
                 userElement.appendChild(document.createTextNode(message.pixelDrawing.sender + ' a rejoint la pw !'));
-                // btnInscription.textContent = btnDesnscriptionTexte;
                 drawingForm.classList.add('drawingForm-visible');
-                userNameField.classList.add('namefield-visible');
+                usernameForm.classList.add('namefield-hidden');
                 stompClient.send('/app/pixelWar.getPixels', {}, JSON.stringify({messageType: 'AFFICHER_CANVAS'}));
-            } else {
-                window.alert("Nom d'utilisateur déjà existant, veuillez en choisir un autre.");
-            }
         }
 
         //On dessine sur le canvas tous les pixels en temps réel.
