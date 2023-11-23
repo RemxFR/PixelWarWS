@@ -1,0 +1,23 @@
+version: '1.0'
+services:
+  serverws:
+    build:
+      context: .
+    ports:
+      - "8081:8081"
+    environment:
+      - SERVER_PORT=8081
+      - MYSQL_URL=jdbc:mysql://mysqlserver/mypxwar
+    depends_on:
+      - mysqlserver
+
+  mysqlserver:
+    image: mysql:8.0
+    ports:
+      - "3309-3309"
+    environment:
+      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+      - MYSQL_USER=ynov
+      - MYSQL_PASSWORD=ynov
+      - MYSQL_DATABASE=mypxwar
